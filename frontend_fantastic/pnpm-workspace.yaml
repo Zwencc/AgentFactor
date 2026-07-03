@@ -1,0 +1,113 @@
+
+packages:
+  - apps/*
+  - packages/*
+autoInstallPeers: true
+
+catalog:
+  '@playwright/test': ^1.50.0
+  '@antfu/eslint-config': ^8.2.0
+  '@clack/prompts': ^1.3.0
+  '@faker-js/faker': ^10.4.0
+  '@iconify/json': ^2.2.471
+  '@iconify/vue': ^5.0.1
+  '@spiriit/vite-plugin-svg-spritemap': ^7.0.0
+  '@stylistic/stylelint-config': ^5.0.0
+  '@types/fs-extra': ^11.0.4
+  '@types/node': ^25.6.2
+  '@types/nprogress': ^0.2.3
+  '@types/path-browserify': ^1.0.3
+  '@types/qs': ^6.15.1
+  '@unocss/core': ^66.6.8
+  '@unocss/eslint-plugin': ^66.6.8
+  '@vee-validate/zod': ^4.15.1
+  '@vitejs/plugin-legacy': ^8.0.1
+  '@vitejs/plugin-vue': ^6.0.6
+  '@vitejs/plugin-vue-jsx': ^5.1.5
+  '@vue/tsconfig': ^0.9.1
+  '@vueuse/components': ^14.3.0
+  '@vueuse/core': ^14.3.0
+  '@vueuse/integrations': ^14.3.0
+  '@zumer/snapdom': ^2.12.0
+  autoprefixer: ^10.5.0
+  axios: ^1.16.0
+  boxen: ^8.0.1
+  bumpp: ^11.1.0
+  class-variance-authority: ^0.7.1
+  clsx: ^2.1.1
+  cz-git: ^1.13.1
+  dayjs: ^1.11.20
+  defu: ^6.1.7
+  element-plus: ^2.14.0
+  eruda: ^3.4.3
+  es-toolkit: ^1.46.1
+  eslint: ^10.3.0
+  filesize: ^11.0.17
+  fs-extra: ^11.3.5
+  hotkeys-js: ^4.0.4
+  http-server: ^14.1.1
+  lint-staged: ^17.0.4
+  lucide-vue-next: ^1.0.0
+  mitt: ^3.0.1
+  npm-run-all2: ^8.0.4
+  nprogress: ^0.2.0
+  path-browserify: ^1.0.1
+  path-to-regexp: ^8.4.2
+  picocolors: ^1.1.1
+  pinia: ^3.0.4
+  pinia-plugin-persistedstate: ^4.7.1
+  pinyin-pro: ^3.28.1
+  postcss: ^8.5.14
+  postcss-nested: ^7.0.2
+  qs: ^6.15.1
+  reka-ui: ^2.9.7
+  sass-embedded: ^1.99.0
+  scule: ^1.3.0
+  simple-git-hooks: ^2.13.1
+  stylelint: ^17.11.0
+  stylelint-config-recess-order: ^7.7.0
+  stylelint-config-standard-scss: ^17.0.0
+  stylelint-config-standard-vue: ^1.0.0
+  stylelint-scss: ^7.0.0
+  svgo: ^4.0.1
+  tailwind-merge: ^3.5.0
+  taze: ^19.11.0
+  tsx: ^4.21.0
+  type-fest: ^5.6.0
+  typescript: ^6.0.3
+  ua-parser-js: ^2.0.9
+  unbuild: ^3.6.1
+  unocss: ^66.6.8
+  unocss-preset-animations: ^1.3.0
+  unplugin-auto-import: ^21.0.0
+  unplugin-turbo-console: ^2.3.2
+  unplugin-vue-components: ^32.0.0
+  vconsole: ^3.15.1
+  vee-validate: ^4.15.1
+  vite: ^8.0.11
+  vite-plugin-app-loading: ^0.5.4
+  vite-plugin-archiver: ^0.3.2
+  vite-plugin-banner: ^0.8.1
+  vite-plugin-compression2: ^2.5.3
+  vite-plugin-env-parse: ^1.0.15
+  vite-plugin-fake-server: ^2.2.3
+  vite-plugin-vue-devtools: ^8.1.2
+  vue: ^3.5.34
+  vue-input-otp: ^0.3.2
+  vue-router: ^5.0.6
+  vue-sonner: ^2.0.9
+  vue-tsc: ^3.2.8
+  zod: ^4.4.3
+catalogMode: prefer
+cleanupUnusedCatalogs: true
+engineStrict: true
+ignoreWorkspaceRootCheck: true
+shamefullyHoist: true
+shellEmulator: true
+verifyDepsBeforeRun: false
+onlyBuiltDependencies:
+  - '@parcel/watcher'
+  - core-js
+  - esbuild
+  - simple-git-hooks
+  - vue-demi

@@ -1,0 +1,12 @@
+click>=8.1
+fastapi>=0.111
+uvicorn[standard]>=0.30
+pydantic>=2.7
+sqlalchemy>=2.0
+sqlmodel>=0.0.16
+libtmux>=0.25
+watchdog>=4.0
+httpx>=0.27
+python-frontmatter>=1.1
+croniter>=1.4
+fastmcp>=2.0

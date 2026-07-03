@@ -1,0 +1,53 @@
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+
+# Local frontend/template archives
+*.zip
+*.egg
+
+# Virtual environments and uv
+.venv/
+.uv/
+agent/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+scripts/uv
+
+# Logs and build outputs
+logs/
+dist/
+build/
+*.log
+
+# MacOS
+.DS_Store
+
+# Editor settings
+.idea/
+.vscode/
+
+# Claude Code settings
+.claude/
+
+# Local environment files
+.env
+.env.local
+.env.*.local
+
+# Database files (if created locally)
+*.db
+*.sqlite
+*.sqlite3
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
