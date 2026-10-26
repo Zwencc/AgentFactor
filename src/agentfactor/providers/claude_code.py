@@ -11,6 +11,7 @@ from typing import Optional
 from agentfactor.clients.tmux import TmuxError
 from agentfactor.models.enums import TerminalStatus
 from agentfactor.providers.base import BaseProvider, ProviderInitializationError
+from agentfactor.security.sandbox import public_agent_sandbox_command
 from agentfactor.utils.agent_profiles import AgentProfileError, load_agent_profile
 
 ANSI_CODE_PATTERN = r"\x1b\[[0-9;]*m"
@@ -62,11 +63,7 @@ class ClaudeCodeProvider(BaseProvider):
             if system_prompt:
                 command_parts.extend(["--append-system-prompt", shlex.quote(system_prompt)])
 
-            if profile.mcpServers:
-                mcp_json = profile.model_dump_json(include={"mcpServers"})
-                command_parts.extend(["--mcp-config", shlex.quote(mcp_json)])
-
-        return command_parts
+        return public_agent_sandbox_command("claude-code", self.terminal_id, command_parts)
 
     def initialize(self) -> None:
         self.ensure_binary_exists("claude")

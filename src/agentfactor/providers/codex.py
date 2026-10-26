@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import logging
+import os
+import pwd
 import re
 import shlex
 import time
@@ -11,6 +13,7 @@ from typing import Optional
 
 from agentfactor.models.enums import TerminalStatus
 from agentfactor.providers.base import BaseProvider, ProviderInitializationError
+from agentfactor.security.sandbox import public_agent_sandbox_command
 from agentfactor.utils.agent_profiles import AgentProfileError, load_agent_profile
 from agentfactor.utils.wsl import wsl_home
 
@@ -78,22 +81,14 @@ class CodexProvider(BaseProvider):
 
     def _build_env_prefix(self) -> list[str]:
         """Return ['env', KEY=VAL, ...] so Codex has a writable HOME/TMP and recorder disabled."""
-        if getattr(self.tmux, "uses_wsl", False):
-            base = f"{wsl_home()}/.conductor/providers/codex/{self.terminal_id}"
-        else:
-            base_path = Path.home() / ".conductor" / "providers" / "codex" / self.terminal_id
-            for sub in ("tmp", "state", "cache", "rollouts"):
-                (base_path / sub).mkdir(parents=True, exist_ok=True)
-            base = str(base_path)
+        sandbox_home = pwd.getpwuid(os.getuid()).pw_dir
         defaults = {
-            "HOME": self._profile_var("HOME") or (
-                f"{wsl_home()}/.conductor" if getattr(self.tmux, "uses_wsl", False) else str(Path.home() / ".conductor")
-            ),
-            "TMPDIR": self._profile_var("TMPDIR") or f"{base}/tmp",
-            "XDG_STATE_HOME": self._profile_var("XDG_STATE_HOME") or f"{base}/state",
-            "XDG_CACHE_HOME": self._profile_var("XDG_CACHE_HOME") or f"{base}/cache",
+            "HOME": sandbox_home,
+            "TMPDIR": "/tmp",
+            "XDG_STATE_HOME": f"{sandbox_home}/.local/state",
+            "XDG_CACHE_HOME": f"{sandbox_home}/.cache",
             "CODEX_DISABLE_RECORDER": self._profile_var("CODEX_DISABLE_RECORDER") or "1",
-            "CODEX_ROLLOUT_DIR": self._profile_var("CODEX_ROLLOUT_DIR") or f"{base}/rollouts",
+            "CODEX_ROLLOUT_DIR": f"{sandbox_home}/.codex/rollouts",
         }
 
         extra_env = self._profile_var("codex_env")
@@ -101,7 +96,8 @@ class CodexProvider(BaseProvider):
             for pair in shlex.split(extra_env):
                 if "=" in pair:
                     key, value = pair.split("=", 1)
-                    defaults[key] = value
+                    if key not in {"HOME", "TMPDIR", "XDG_STATE_HOME", "XDG_CACHE_HOME", "CODEX_ROLLOUT_DIR"}:
+                        defaults[key] = value
 
         env_prefix = ["env"]
         env_prefix.extend(f"{k}={v}" for k, v in defaults.items())
@@ -122,7 +118,7 @@ class CodexProvider(BaseProvider):
         if extra_args:
             cmd.extend(shlex.split(extra_args))
 
-        return self._build_env_prefix() + cmd
+        return public_agent_sandbox_command("codex", self.terminal_id, self._build_env_prefix() + cmd)
 
     def initialize(self) -> None:
         self.ensure_binary_exists("codex")

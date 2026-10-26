@@ -53,6 +53,7 @@ from agentfactor.models.terminal import (
 )
 from agentfactor.providers.base import ProviderInitializationError
 from agentfactor.providers.manager import ProviderManager
+from agentfactor.security.api import router as security_router
 from agentfactor.services.approval_service import ApprovalService
 from agentfactor.services.cleanup_service import CleanupService
 from agentfactor.services.event_service import EventService
@@ -78,6 +79,7 @@ from agentfactor.utils.pathing import ensure_runtime_directories
 from agentfactor.utils.wsl import command_exists
 
 app = FastAPI(title="AgentFactor API", version="0.1.0")
+app.include_router(security_router)
 ADMIN_DIST_DIR = Path(__file__).resolve().parents[3] / "frontend_fantastic" / "apps" / "core" / "dist"
 
 PROVIDER_CATALOG = [

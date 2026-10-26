@@ -206,6 +206,9 @@ class TerminalService:
                 session = terminal.session_name
                 remaining = 0
 
+        from agentfactor.security.sandbox import SandboxService
+        SandboxService.mark_terminal_ended(terminal_id)
+
         if remaining == 0:
             try:
                 self.tmux.kill_session(session)

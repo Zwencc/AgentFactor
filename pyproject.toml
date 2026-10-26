@@ -27,7 +27,9 @@ dependencies = [
   "httpx>=0.27",
   "python-frontmatter>=1.1",
   "croniter>=1.4",
-  "fastmcp>=2.0"
+  "fastmcp>=2.0",
+  "jsonschema>=4.23",
+  "PyJWT[crypto]>=2.9"
 ]
 
 [build-system]
@@ -91,3 +93,4 @@ af = "agentfactor.cli.main:cli"
 acd = "agentfactor.cli.main:cli"
 agentfactor-mcp = "agentfactor.mcp_server.main:run"
 acd-mcp = "agentfactor.mcp_server.main:run"
+agentfactor-security-mcp = "agentfactor.mcp_server.security_gateway:run"
