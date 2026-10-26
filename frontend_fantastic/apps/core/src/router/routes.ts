@@ -1,7 +1,6 @@
 import type { RouteRecordMainRaw } from '@fantastic-admin/types'
 import type { RouteRecordRaw } from 'vue-router'
 import { text } from '@/i18n'
-import pinia from '@/store'
 
 function Layout() {
   return import('@/layouts/index.vue')
@@ -29,7 +28,7 @@ const systemRoutes: RouteRecordRaw[] = [
     children: [
       {
         path: '',
-        redirect: '/overview',
+        redirect: '/security',
       },
       {
         path: 'reload',
@@ -40,6 +39,28 @@ const systemRoutes: RouteRecordRaw[] = [
           breadcrumb: false,
         },
       },
+      ...[
+        'overview',
+        'tasks',
+        'sessions',
+        'prompts',
+        'approvals',
+        'context',
+        'terminal-history',
+        'work-graph',
+        'topology',
+        'providers',
+        'settings/ai-review',
+        'handbook',
+      ].map(path => ({ path, redirect: '/security' })),
+      {
+        path: 'security/decisions',
+        redirect: '/security/audit',
+      },
+      {
+        path: 'security/actions',
+        redirect: '/security/audit',
+      },
     ],
   },
 ]
@@ -47,132 +68,53 @@ const systemRoutes: RouteRecordRaw[] = [
 const asyncRoutes: RouteRecordMainRaw[] = [
   {
     meta: {
-      title: () => text(useAppSettingsStore(pinia).settings.app.home.title, '总览'),
-      icon: 'i-lucide:layout-dashboard',
+      title: () => text('AgentFactor Security', 'AgentFactor 安全'),
+      icon: 'i-lucide:shield',
     },
     children: [
       {
-        path: '/overview',
-        name: 'overview',
-        component: () => import('@/views/index.vue'),
+        path: '/security',
+        name: 'securityOverview',
+        component: () => import('@/views/security-overview.vue'),
         meta: {
-          title: () => text(useAppSettingsStore(pinia).settings.app.home.title, '总览'),
-          icon: 'i-lucide:layout-dashboard',
-        },
-      },
-    ],
-  },
-  {
-    meta: {
-      title: () => text('Task Center', '任务中心'),
-      icon: 'i-lucide:play-square',
-    },
-    children: [
-      {
-        path: '/tasks',
-        name: 'tasks',
-        component: () => import('@/views/tasks.vue'),
-        meta: {
-          title: () => text('Task Center', '任务中心'),
-          icon: 'i-lucide:play-square',
-        },
-      },
-    ],
-  },
-  {
-    meta: {
-      title: () => text('AgentFactor', '智能体控制台'),
-      icon: 'i-lucide:bot',
-    },
-    children: [
-      {
-        path: '/sessions',
-        name: 'sessions',
-        component: () => import('@/views/sessions.vue'),
-        meta: {
-          title: () => text('Sessions', '终端会话'),
-          icon: 'i-lucide:terminal-square',
-        },
-      },
-      {
-        path: '/prompts',
-        name: 'prompts',
-        component: () => import('@/views/prompts.vue'),
-        meta: {
-          title: () => text('Prompts', '协作提示'),
-          icon: 'i-lucide:message-square-reply',
-        },
-      },
-      {
-        path: '/approvals',
-        name: 'approvals',
-        component: () => import('@/views/approvals.vue'),
-        meta: {
-          title: () => text('Approvals', '审批'),
+          title: () => text('Security Overview', '安全总览'),
           icon: 'i-lucide:shield-check',
         },
       },
       {
-        path: '/context',
-        name: 'context',
-        component: () => import('@/views/context.vue'),
+        path: '/security/audit',
+        name: 'securityAudit',
+        component: () => import('@/views/security-audit.vue'),
         meta: {
-          title: () => text('Overseer Console', '运行监控台'),
-          icon: 'i-lucide:activity',
+          title: () => text('Security Audit', '安全审计'),
+          icon: 'i-lucide:scroll-text',
         },
       },
       {
-        path: '/terminal-history',
-        name: 'terminalHistory',
-        component: () => import('@/views/terminal-history.vue'),
+        path: '/security/mcp',
+        name: 'securityMcp',
+        component: () => import('@/views/security-mcp.vue'),
         meta: {
-          title: () => text('Terminal History', '终端历史分析'),
-          icon: 'i-lucide:history',
+          title: () => text('MCP Gateway', 'MCP 网关'),
+          icon: 'i-lucide:blocks',
         },
       },
       {
-        path: '/work-graph',
-        name: 'workGraph',
-        component: () => import('@/views/work-graph.vue'),
+        path: '/security/sandboxes',
+        name: 'securitySandboxes',
+        component: () => import('@/views/security-sandboxes.vue'),
         meta: {
-          title: () => text('Work Graph', '工作图谱'),
-          icon: 'i-lucide:git-branch',
+          title: () => text('Agent Sandboxes', 'Agent 沙箱'),
+          icon: 'i-lucide:box',
         },
       },
       {
-        path: '/topology',
-        name: 'topology',
-        component: () => import('@/views/topology.vue'),
+        path: '/security/endpoints/:endpointId',
+        name: 'securityEndpoint',
+        component: () => import('@/views/security-endpoint.vue'),
         meta: {
-          title: () => text('Topology', '团队拓扑'),
-          icon: 'i-lucide:network',
-        },
-      },
-      {
-        path: '/providers',
-        name: 'providers',
-        component: () => import('@/views/providers.vue'),
-        meta: {
-          title: () => text('Providers', '运行环境'),
-          icon: 'i-lucide:plug-zap',
-        },
-      },
-      {
-        path: '/settings/ai-review',
-        name: 'aiReviewSettings',
-        component: () => import('@/views/ai-review.vue'),
-        meta: {
-          title: () => text('AI Review', 'AI 审查'),
-          icon: 'i-lucide:badge-check',
-        },
-      },
-      {
-        path: '/handbook',
-        name: 'handbook',
-        component: () => import('@/views/handbook.vue'),
-        meta: {
-          title: () => text('Handbook', '操作手册'),
-          icon: 'i-lucide:book-open',
+          title: () => text('Endpoint Detail', '端点详情'),
+          menu: false,
         },
       },
     ],

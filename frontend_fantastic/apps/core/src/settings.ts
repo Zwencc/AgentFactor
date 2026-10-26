@@ -3,7 +3,7 @@ import { setSettings } from '@fantastic-admin/settings'
 export default setSettings({
   app: {
     home: {
-      title: 'Overview',
+      title: 'AgentFactor',
       fullPath: '/',
     },
     account: {

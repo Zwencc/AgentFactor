@@ -1,9 +1,7 @@
 import os
 import sys
-import time
 import urllib.error
 import urllib.request
-import json
 
 from playwright.sync_api import Error, sync_playwright
 
@@ -13,8 +11,6 @@ CHROME = os.environ.get(
     "PLAYWRIGHT_EXECUTABLE_PATH",
     r"C:\Program Files\Google\Chrome\Application\chrome.exe",
 )
-PROJECT_ID = os.environ.get("ACD_TEST_PROJECT", f"e2e-{int(time.time())}")
-
 FAILURES: list[str] = []
 
 
@@ -27,169 +23,60 @@ def fail(message: str) -> None:
     FAILURES.append(message)
 
 
-def request(method: str, path: str, payload: dict | None = None) -> tuple[int, dict | str]:
-    body = None if payload is None else json.dumps(payload).encode("utf-8")
-    req = urllib.request.Request(
-        f"{BASE_URL}{path}",
-        data=body,
-        method=method,
-        headers={"Content-Type": "application/json"},
-    )
+def server_ready() -> bool:
     try:
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            raw = resp.read().decode("utf-8")
-            try:
-                return resp.status, json.loads(raw) if raw else {}
-            except json.JSONDecodeError:
-                return resp.status, raw
-    except urllib.error.HTTPError as exc:
-        raw = exc.read().decode("utf-8")
-        try:
-            return exc.code, json.loads(raw) if raw else {}
-        except json.JSONDecodeError:
-            return exc.code, raw
+        with urllib.request.urlopen(f"{BASE_URL}/security/v1alpha1/overview", timeout=10) as response:
+            return response.status == 200
+    except (urllib.error.URLError, TimeoutError):
+        return False
 
 
-def click_text(page, *parts: str) -> bool:
-    last_error = None
-    for part in parts:
-        try:
-            page.get_by_text(part, exact=False).first.click(timeout=6000)
-            ok(f"clicked {part}")
-            return True
-        except Error as exc:
-            last_error = exc
-    fail(f"cannot click {'/'.join(parts)}: {last_error}")
-    return False
-
-
-def wait_text(page, *parts: str, timeout: int = 10000) -> bool:
-    last_error = None
-    for part in parts:
-        try:
-            page.get_by_text(part, exact=False).first.wait_for(timeout=timeout)
-            ok(f"text visible {part}")
-            return True
-        except Error as exc:
-            last_error = exc
-    fail(f"text not visible {'/'.join(parts)}: {last_error}")
-    return False
-
-
-def sample_blueprint(project_id: str) -> str:
-    return f"""
-[meta]
-schema_version = "1"
-project_id = "{project_id}"
-title = "Dashboard smoke graph"
-generated_by = "planner"
-generated_at = "2026-05-15T10:00:00Z"
-
-[[items]]
-id = "setup"
-title = "Smoke setup"
-description = "Prepare the smoke test baseline."
-category = "feature"
-priority = 2
-effort_hours = 2.0
-depends_on = []
-proof_requirements = ["git_commit", "test_pass"]
-acceptance_criteria = ["Baseline exists"]
-files_of_interest = ["README.md"]
-
-[[items]]
-id = "review"
-title = "Smoke review"
-description = "Review the generated graph."
-category = "review"
-priority = 3
-effort_hours = 4.0
-depends_on = ["setup"]
-proof_requirements = ["reviewer_signoff"]
-acceptance_criteria = ["Review is visible"]
-files_of_interest = ["docs/dashboard-e2e-test-cases.md"]
-""".strip()
+def wait_heading(page, pattern: str, route: str) -> None:
+    try:
+        page.get_by_role("heading", name=pattern).wait_for(timeout=8000)
+        ok(f"{route} renders")
+    except Error as exc:
+        fail(f"{route} did not render {pattern}: {exc}")
 
 
 def main() -> int:
-    status, _ = request("GET", "/providers")
-    if status != 200:
-        fail(f"/providers returned {status}")
+    if not server_ready():
+        fail("security overview API is unavailable")
         return 1
-    ok("/providers returns 200")
+    ok("security overview API returns 200")
 
-    with sync_playwright() as p:
+    with sync_playwright() as playwright:
         launch_kwargs = {"headless": True}
         if os.path.exists(CHROME):
             launch_kwargs["executable_path"] = CHROME
-        browser = p.chromium.launch(**launch_kwargs)
+        browser = playwright.chromium.launch(**launch_kwargs)
         page = browser.new_page(viewport={"width": 1440, "height": 900})
 
-        page.on("pageerror", lambda err: fail(f"page error: {err}"))
-        page.on("console", lambda msg: fail(f"console error: {msg.text}") if msg.type == "error" else None)
-        page.on("response", lambda resp: fail(f"HTTP {resp.status} {resp.url}") if resp.status >= 500 else None)
+        page.on("pageerror", lambda error: fail(f"page error: {error}"))
+        page.on("console", lambda message: fail(f"console error: {message.text}") if message.type == "error" else None)
+        page.on("response", lambda response: fail(f"HTTP {response.status} {response.url}") if response.status >= 500 else None)
 
         try:
-            page.goto(f"{BASE_URL}/", wait_until="networkidle", timeout=30000)
-            if "/admin" in page.url:
-                ok("root redirects to /admin")
-            else:
-                fail(f"root did not redirect to /admin: {page.url}")
-
-            routes = [
-                "/admin/overview",
-                "/admin/tasks",
-                "/admin/sessions",
-                "/admin/prompts",
-                "/admin/approvals",
-                "/admin/context",
-                "/admin/work-graph",
-                "/admin/topology",
-                "/admin/providers",
-                "/admin/handbook",
+            pages = [
+                ("/admin/#/security", "安全总览"),
+                ("/admin/#/security/audit", "安全审计"),
+                ("/admin/#/security/mcp", "MCP 网关"),
+                ("/admin/#/security/sandboxes", "Agent 沙箱"),
             ]
-            for route in routes:
+            for route, heading in pages:
                 page.goto(f"{BASE_URL}{route}", wait_until="networkidle", timeout=30000)
-                body = page.locator("body").inner_text(timeout=10000)
-                if "404" in body and "Not Found" in body:
-                    fail(f"{route} rendered 404")
-                else:
-                    ok(f"{route} renders")
+                wait_heading(page, heading, route)
 
-            page.goto(f"{BASE_URL}/admin/work-graph", wait_until="networkidle", timeout=30000)
-            if click_text(page, "智能生成", "Auto-generate"):
-                page.locator("textarea").first.fill("Build a small smoke-test dashboard workflow.")
-                textareas = page.locator("textarea")
-                if textareas.count() > 1:
-                    textareas.nth(1).fill("Use a two item dependency chain.")
-                with page.expect_response(lambda r: r.url.endswith("/work-graph/generate"), timeout=15000) as resp_info:
-                    click_text(page, "生成", "Generate")
-                gen_resp = resp_info.value
-                if gen_resp.status >= 400:
-                    fail(f"UI generate returned {gen_resp.status}: {gen_resp.text()}")
-                else:
-                    terminal_id = gen_resp.json()["terminal_id"]
-                    ok("UI generate request returned terminal_id")
-                    status, _ = request(
-                        "POST",
-                        f"/work-graph/blueprint/{terminal_id}",
-                        {"toml_content": sample_blueprint(PROJECT_ID)},
-                    )
-                    if status != 200:
-                        fail(f"blueprint submit returned {status}")
-                    else:
-                        ok("blueprint submitted for UI polling")
-                        wait_text(page, "审核", "Review Blueprint", timeout=10000)
-                        with page.expect_response(lambda r: "/work-graph/blueprint/" in r.url and r.url.endswith("/import"), timeout=15000):
-                            click_text(page, "导入", "Import selected")
-                        wait_text(page, "Smoke setup", timeout=10000)
+            page.goto(f"{BASE_URL}/admin/#/work-graph", wait_until="networkidle", timeout=30000)
+            page.wait_for_url("**/admin/#/security")
+            if page.url.endswith("/#/security"):
+                ok("legacy orchestration route redirects")
+            else:
+                fail(f"legacy route did not redirect: {page.url}")
         finally:
             browser.close()
 
     if FAILURES:
-        print("\nFailures:")
-        for failure in FAILURES:
-            print(f"- {failure}")
         return 1
     print("Dashboard smoke test passed.")
     return 0

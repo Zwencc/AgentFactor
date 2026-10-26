@@ -1,31 +1,33 @@
 import { expect, test } from '@playwright/test'
-import { mockConductorApi } from './helpers'
+import { mockSecurityApi } from './helpers'
 
 test.beforeEach(async ({ page }) => {
-  await mockConductorApi(page)
+  await mockSecurityApi(page)
 })
 
-test('work graph page loads', async ({ page }) => {
+test('root opens the security overview', async ({ page }) => {
+  await page.goto('/admin/')
+  await expect(page).toHaveURL(/#\/security$/)
+  await expect(page.getByRole('heading', { name: 'Security Overview' })).toBeVisible()
+})
+
+test('security audit combines the security activity sources', async ({ page }) => {
+  await page.goto('/admin/#/security/audit')
+  await expect(page.getByRole('heading', { name: 'Security Audit' })).toBeVisible()
+  await expect(page.getByText('Gateway decisions', { exact: true })).toBeVisible()
+  await expect(page.getByText('All sources', { exact: true })).toBeVisible()
+})
+
+test('MCP Gateway and Agent Sandboxes load', async ({ page }) => {
+  await page.goto('/admin/#/security/mcp')
+  await expect(page.getByRole('heading', { name: 'MCP Gateway' })).toBeVisible()
+
+  await page.goto('/admin/#/security/sandboxes')
+  await expect(page.getByRole('heading', { name: 'Agent Sandboxes' })).toBeVisible()
+})
+
+test('legacy orchestration routes redirect to security overview', async ({ page }) => {
   await page.goto('/admin/#/work-graph')
-  await expect(page.getByRole('heading', { name: 'Work Graph' })).toBeVisible()
-  await expect(page.locator('select').first()).toBeVisible()
-})
-
-test('overview page loads', async ({ page }) => {
-  await page.goto('/admin/#/overview')
-  await page.waitForLoadState('networkidle')
-  // Page should render without a full-screen error
-  await expect(page.locator('body')).not.toBeEmpty()
-})
-
-test('sessions page loads', async ({ page }) => {
-  await page.goto('/admin/#/sessions')
-  await page.waitForLoadState('networkidle')
-  await expect(page.locator('body')).not.toBeEmpty()
-})
-
-test('approvals page loads', async ({ page }) => {
-  await page.goto('/admin/#/approvals')
-  await page.waitForLoadState('networkidle')
-  await expect(page.locator('body')).not.toBeEmpty()
+  await expect(page).toHaveURL(/#\/security$/)
+  await expect(page.getByRole('heading', { name: 'Security Overview' })).toBeVisible()
 })

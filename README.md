@@ -49,11 +49,11 @@ Native Executor 为文件、进程、MCP、网络和模型操作提供逐次执�
 
 ### 产品界面
 
-#### 安全决策
+#### 安全审计
 
-集中查看 Agent、工作区、事件、策略结果、证据摘要与关联 ID，不保留原始工具参数。
+统一查看 Gateway 决策、ACR 事件、风险提醒、策略结果、证据摘要与关联 ID，不保留原始工具参数。
 
-![安全决策](docs/images/security-decisions.png)
+![安全审计](docs/images/security-decisions.png)
 
 #### MCP 资产
 
@@ -235,7 +235,7 @@ Resources can be labeled `public`, `internal`, `source-code`, `pii`, `credential
 ### Product tour
 
 - **Security overview:** current endpoints, capability posture, events, alerts, and enforcement state in one view. See the [security overview screenshot](docs/images/security-overview.png).
-- **Security decisions:** agent, workspace, event, policy result, evidence digest, and correlation ID without retaining raw tool arguments. See [security decisions](docs/images/security-decisions.png).
+- **Security audit:** gateway decisions, ACR events, risk alerts, policy results, evidence digests, and correlation IDs without retaining raw tool arguments. See [security audit](docs/images/security-decisions.png).
 - **MCP inventory:** discover controlled servers and tools, pin input schemas, and detect tool-definition changes. See [MCP inventory](docs/images/security-mcp.png).
 - **Agent sandboxes:** inspect the isolation evidence and explicit `NOT_ENFORCED` boundaries of each public-agent session. See [agent sandboxes](docs/images/security-sandboxes.png).
 

@@ -263,7 +263,7 @@ class ProofCollector:
                 window.status = "closed"
                 window.closed_at = datetime.utcnow().isoformat()
                 work_item.status = WorkItemStatus.DONE
-                work_item.updated_at = datetime.utcnow().isoformat()
+                work_item.updated_at = datetime.utcnow()
 
                 # Capture for capability recording after session closes
                 if work_item.owner_terminal_id:
@@ -329,7 +329,7 @@ class ProofCollector:
             work_item = db.get(WorkItem, window.work_item_id)
             if work_item is not None:
                 work_item.status = WorkItemStatus.IN_PROGRESS
-                work_item.updated_at = datetime.utcnow().isoformat()
+                work_item.updated_at = datetime.utcnow()
                 owner = work_item.owner_terminal_id
                 title = work_item.title
                 wid_str = window.work_item_id
